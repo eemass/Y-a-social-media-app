@@ -189,7 +189,12 @@ export const commentPost = async (req, res) => {
 
     await notification.save();
 
-    res.status(200).json({ message: "Comment added successfully." });
+    const updatedPost = await Post.findById(req.params.id).populate(
+      "comments.user",
+      "fullName username"
+    );
+
+    res.status(200).json(updatedPost.comments);
   } catch (error) {
     console.log("Error in commentPost: ", error.message);
     res.status(500).json({ error: "Internal Server Error" });
