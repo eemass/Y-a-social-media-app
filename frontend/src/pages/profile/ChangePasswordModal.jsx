@@ -1,4 +1,7 @@
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
+import toast from "react-hot-toast";
+import LoadingSpinner from "../../components/common/LoadingSpinner";
 
 const ChangePasswordModal = () => {
   const [formData, setFormData] = useState({
@@ -9,6 +12,39 @@ const ChangePasswordModal = () => {
   const handleInputChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
+
+  const queryClient = useQueryClient();
+
+  const { mutate: updatePassword, isPending: isUpdating } = useMutation({
+    mutationFn: async () => {
+      try {
+        const res = await fetch("/api/user/updatePassword", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(formData),
+        });
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.error || "Something went wrong.");
+        }
+
+        return data;
+      } catch (error) {
+        throw new Error(error);
+      }
+    },
+    onSuccess: () => {
+      toast.success("Your password was updated.");
+      Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["authUserKey"] }),
+        queryClient.invalidateQueries({ queryKey: ["userProfile"] }),
+      ]);
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
 
   return (
     <>
@@ -27,7 +63,7 @@ const ChangePasswordModal = () => {
             className="flex flex-col gap-4"
             onSubmit={(e) => {
               e.preventDefault();
-              alert("Password updated successfully");
+              updatePassword();
             }}
           >
             <div className="flex flex-wrap gap-2">
@@ -49,7 +85,7 @@ const ChangePasswordModal = () => {
               />
             </div>
             <button className="btn btn-primary rounded-full btn-sm text-white">
-              Update
+              {isUpdating ? <LoadingSpinner /> : "Update"}
             </button>
           </form>
         </div>
