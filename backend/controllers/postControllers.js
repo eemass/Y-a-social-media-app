@@ -166,7 +166,9 @@ export const likeUnlikePost = async (req, res) => {
 
 export const commentPost = async (req, res) => {
   try {
-    const post = await Post.findById(req.params.id);
+    const post = await Post.findById(req.params.id)
+      .populate({ path: "user", select: "-password" })
+      .populate({ path: "comments.user", select: "-password" });
     const { text } = req.body;
 
     if (!post) {
@@ -179,8 +181,6 @@ export const commentPost = async (req, res) => {
 
     post.comments.push({ text, user: req.user._id });
 
-    await post.save();
-
     const notification = new Notification({
       to: post.user,
       from: req.user._id,
@@ -189,12 +189,13 @@ export const commentPost = async (req, res) => {
 
     await notification.save();
 
-    const updatedPost = await Post.findById(req.params.id).populate(
-      "comments.user",
-      "fullName username"
-    );
+    await post.populate({ path: "comments.user", select: "-password" });
 
-    res.status(200).json(updatedPost.comments);
+    await post.save();
+
+    const updatedComments = post.comments;
+
+    res.status(200).json(updatedComments);
   } catch (error) {
     console.log("Error in commentPost: ", error.message);
     res.status(500).json({ error: "Internal Server Error" });
