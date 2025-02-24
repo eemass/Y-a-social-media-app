@@ -39,7 +39,7 @@ const CreatePost = () => {
     onSuccess: () => {
       setText("");
       setImg(null);
-      toast.success("Post created.");
+      toast.success("Posted.");
       queryClient.invalidateQueries({ queryKey: ["postsKey"] });
     },
   });
