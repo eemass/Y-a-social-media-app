@@ -89,7 +89,8 @@ export const getUserPosts = async (req, res) => {
 
 export const createPost = async (req, res) => {
   try {
-    const { text, image } = req.body;
+    const { text } = req.body;
+    let { image } = req.body;
     const userId = req.user._id.toString();
 
     const user = await User.findById(userId);
