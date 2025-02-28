@@ -23,7 +23,7 @@ Y is a social media platform built with the MERN stack, offering an engaging and
 
 ## Live Demo
 
-Try out the app here: [Live Demo] https://y-a-social-media-app.onrender.com/
+Try out the app here: https://y-a-social-media-app.onrender.com/
 
 ## Contact
 
